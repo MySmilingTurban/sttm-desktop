@@ -11,10 +11,17 @@ jobs:
     executor: macos-exec
     steps:
       - checkout
+      - run:
+          name: Ensure Python distutils support
+          command: |
+            # install setuptools (which brings back distutils)
+            brew install python-setuptools    # Homebrew formula for setuptools :contentReference[oaicite:2]{index=2}
+            python3 -m pip install --upgrade setuptools
       - restore_cache:
           key: dependency-cache-{{ checksum "package.json" }}
       - run:
           name: Verify nvm Installation and Install Node.js v18
+          # run in a login shell so ~/.bash_profile / ~/.bashrc are loaded
           command: |
             if ! command -v nvm &> /dev/null; then
               echo "nvm could not be found, installing..."
