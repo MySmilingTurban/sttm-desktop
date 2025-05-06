@@ -41,7 +41,7 @@ jobs:
             npm install
             npm run dist:macArm
       - store_artifacts:
-          path: $CIRCLE_WORKING_DIRECTORY/builds
+          path: /builds
       - save_cache:
           key: dependency-cache-{{ checksum "package.json" }}
           paths:
