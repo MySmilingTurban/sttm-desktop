@@ -50,6 +50,7 @@ jobs:
           name: Import Code Signing Certificate
           command: |
             nvm use v18.18.0
+            echo "CSC_LINK length: ${#CSC_LINK}"
 
             chmod +x packaging/add-osx-cert.sh
             packaging/add-osx-cert.sh
