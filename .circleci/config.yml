@@ -20,7 +20,7 @@ jobs:
       - restore_cache:
           key: dependency-cache-{{ checksum "package.json" }}
       - run:
-          name: Verify nvm Installation and Install Node.js v18
+          name: Verify nvm Installation, Install Node.js v18, Build & Package macOS App
           # run in a login shell so ~/.bash_profile / ~/.bashrc are loaded
           command: |
             if ! command -v nvm &> /dev/null; then
@@ -39,9 +39,7 @@ jobs:
             npm -v
 
             npm install
-      - run:
-          name: Build & Package macOS App
-          command: npm run dist:macArm
+            npm run dist:macArm
       - store_artifacts:
           path: $CIRCLE_WORKING_DIRECTORY/builds
       - save_cache:
