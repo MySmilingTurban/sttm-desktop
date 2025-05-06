@@ -42,13 +42,13 @@ jobs:
             npm install
             npm run dist:macArm
       - run:
-        name: Locate & rename DMG
-        command: |
-          # find the one file that matches your pattern
-          SRC=$(ls builds/SikhiToTheMax-*-arm64.dmg)
-          echo "Found $SRC"
-          # rename it to a fixed name
-          cp "$SRC" builds/SikhiToTheMax-arm64-latest.dmg
+          name: Locate & rename DMG
+          command: |
+            # find the one file that matches your pattern
+            SRC=$(ls builds/SikhiToTheMax-*-arm64.dmg)
+            echo "Found $SRC"
+            # rename it to a fixed name
+            cp "$SRC" builds/SikhiToTheMax-arm64-latest.dmg
       - store_artifacts:
           path: builds/SikhiToTheMax-arm64-latest.dmg
       - save_cache:
