@@ -40,8 +40,10 @@ jobs:
 
             npm install
             npm run dist:macArm
+            ls
+            pwd
       - store_artifacts:
-          path: /builds
+          path: /Users/distiller/project/builds
       - save_cache:
           key: dependency-cache-{{ checksum "package.json" }}
           paths:
