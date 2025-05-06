@@ -10,6 +10,12 @@ executors:
 jobs:
   build-mac:
     executor: macos-exec
+    environment:
+      APPLE_ID: $APPLE_ID
+      APPLE_APP_SPECIFIC_PASSWORD: $APPLE_APP_SPECIFIC_PASSWORD
+      APPLE_TEAM_ID: $APPLE_TEAM_ID
+      CSC_LINK: $CSC_LINK
+      CSC_KEY_PASSWORD: $CSC_KEY_PASSWORD
     steps:
       - checkout
       - run:
@@ -18,8 +24,10 @@ jobs:
             # install setuptools (which brings back distutils)
             brew install python-setuptools    # Homebrew formula for setuptools :contentReference[oaicite:2]{index=2}
             python3 -m pip install --upgrade setuptools
+
       - restore_cache:
           key: dependency-cache-{{ checksum "package.json" }}
+
       - run:
           name: Verify nvm Installation, Install Node.js v18, Build & Package macOS App
           # run in a login shell so ~/.bash_profile / ~/.bashrc are loaded
@@ -36,11 +44,15 @@ jobs:
             nvm install v18.18.0
             nvm use v18.18.0
 
-            node -v
-            npm -v
-
             npm install
+
+      - run:
+          name: Import Code Signing Certificate
+          command: |
+            chmod +x packaging/add-osx-cert.sh
+            packaging/add-osx-cert.sh
             npm run dist:macArm
+
       - run:
           name: Locate & rename DMG
           command: |
@@ -48,9 +60,11 @@ jobs:
             SRC=$(ls builds/SikhiToTheMax-*-arm64.dmg)
             echo "Found $SRC"
             # rename it to a fixed name
-            cp "$SRC" builds/SikhiToTheMax-arm64-latest.dmg
+            cp "$SRC" SikhiToTheMax-arm64-latest.dmg
+
       - store_artifacts:
-          path: builds/SikhiToTheMax-arm64-latest.dmg
+          path: SikhiToTheMax-arm64-latest.dmg
+
       - save_cache:
           key: dependency-cache-{{ checksum "package.json" }}
           paths:
