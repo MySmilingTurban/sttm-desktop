@@ -40,17 +40,14 @@ jobs:
 
             npm install
       - run:
-          name: Install Dependencies
-          command: npm install
-      - save_cache:
-          key: dependency-cache-{{ checksum "package.json" }}
-          paths:
-            - ./node_modules
-      - run:
           name: Build & Package macOS App
           command: npm run dist:macArm
       - store_artifacts:
           path: $CIRCLE_WORKING_DIRECTORY/builds
+      - save_cache:
+          key: dependency-cache-{{ checksum "package.json" }}
+          paths:
+            - ./node_modules
 
 workflows:
   build:
