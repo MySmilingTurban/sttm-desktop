@@ -11,8 +11,12 @@ jobs:
     executor: macos-exec
     steps:
       - checkout
+      - restore_cache:
+          key: dependency-cache-{{ checksum "package.json" }}
       - run:
           name: Verify nvm Installation and Install Node.js v18
+          # run in a login shell so ~/.bash_profile / ~/.bashrc are loaded
+          shell: /bin/bash --login -o pipefail {0}
           command: |
             if ! command -v nvm &> /dev/null; then
               echo "nvm could not be found, installing..."
@@ -20,10 +24,16 @@ jobs:
               export NVM_DIR="$HOME/.nvm"
               [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
             fi
+            # if NVM was installed in $HOME:
+            [ -s "$HOME/.nvm/nvm.sh" ] && . "$HOME/.nvm/nvm.sh"
+            
             nvm install v18.18.0
             nvm use v18.18.0
-      - restore_cache:
-          key: dependency-cache-{{ checksum "package.json" }}
+
+            node -v
+            npm -v
+
+            npm install
       - run:
           name: Install Dependencies
           command: npm install
