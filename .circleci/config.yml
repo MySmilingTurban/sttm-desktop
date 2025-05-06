@@ -3,8 +3,8 @@ version: 2.1
 executors:
   macos-exec:
     macos:
-      xcode: "16.0.0"
-    resource_class: macos.m1.medium
+      xcode: "15.4.0"
+    resource_class: macos.m1.medium.gen1
 
 jobs:
   build-mac:
