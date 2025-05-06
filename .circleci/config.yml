@@ -5,6 +5,7 @@ executors:
     macos:
       xcode: "15.4.0"
     resource_class: macos.m1.medium.gen1
+    working_directory: ~/sttmd
 
 jobs:
   build-mac:
@@ -40,10 +41,8 @@ jobs:
 
             npm install
             npm run dist:macArm
-            ls
-            pwd
       - store_artifacts:
-          path: /Users/distiller/project/builds
+          path: ~/sttmd/builds/SikhiToTheMax-*-arm64.dmg
       - save_cache:
           key: dependency-cache-{{ checksum "package.json" }}
           paths:
