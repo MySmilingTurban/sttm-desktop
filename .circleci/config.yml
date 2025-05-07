@@ -48,6 +48,9 @@ jobs:
 
       - run:
           name: Import Code Signing Certificate
+          environment:
+            KEY_CHAIN: build.keychain
+            CERTIFICATE_P12: certificate.p12
           command: |
             nvm use v18.18.0
             echo "CSC_LINK length: ${#CSC_LINK}"
@@ -67,7 +70,7 @@ jobs:
             security import ${CERTIFICATE_P12} -k ${KEY_CHAIN} -P ${CSC_KEY_PASSWORD} -T /usr/bin/codesign;
 
             security set-key-partition-list -S apple-tool:,apple: -s -k "${CSC_KEY_PASSWORD}" "${KEY_CHAIN}"
-            
+
             rm -fr *.p12
             npm run dist:macArm
 
