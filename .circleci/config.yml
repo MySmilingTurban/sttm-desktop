@@ -51,9 +51,24 @@ jobs:
           command: |
             nvm use v18.18.0
             echo "CSC_LINK length: ${#CSC_LINK}"
+            echo ${CSC_LINK} | base64 --decode > ${CERTIFICATE_P12}
 
-            chmod +x packaging/add-osx-cert.sh
-            packaging/add-osx-cert.sh
+            #create a keychain
+            security create-keychain -p "${CSC_KEY_PASSWORD}" "${KEY_CHAIN}"
+            security set-keychain-settings -t 3600 -l "${KEY_CHAIN}"
+            security list-keychains -d user -s "${KEY_CHAIN}"
+
+            # Make the keychain the default so identities are found
+            security default-keychain -d user -s "${KEY_CHAIN}"
+            
+            # Unlock the keychain
+            security unlock-keychain -p "${CSC_KEY_PASSWORD}" "${KEY_CHAIN}"
+
+            security import ${CERTIFICATE_P12} -k ${KEY_CHAIN} -P ${CSC_KEY_PASSWORD} -T /usr/bin/codesign;
+
+            security set-key-partition-list -S apple-tool:,apple: -s -k "${CSC_KEY_PASSWORD}" "${KEY_CHAIN}"
+            
+            rm -fr *.p12
             npm run dist:macArm
 
       - run:
