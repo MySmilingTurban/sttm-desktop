@@ -17,16 +17,16 @@ jobs:
           key: dependency-cache-{{ checksum "package.json" }}
       
       - run:
-          name: Cleanup all DMG files
+          name: Cleanup all build files
           command: |
-            echo "Cleaning up leftover DMGs..."
-            find . -name "*.dmg" -delete
+            echo "Cleaning up past builds..."
+            rm -rf builds
 
       - run:
           name: Ensure Python distutils support
           command: |
             # install setuptools (which brings back distutils)
-            brew install python-setuptools    # Homebrew formula for setuptools :contentReference[oaicite:2]{index=2}
+            brew install python-setuptools    # Homebrew formula for setuptools
             python3 -m pip install --upgrade setuptools
 
       - run:
@@ -76,14 +76,15 @@ jobs:
 
             security set-key-partition-list -S apple-tool:,apple: -s -k "${CSC_KEY_PASSWORD}" "${KEY_CHAIN}"
 
+            npm run pack:macArm
             rm -fr *.p12
-            npm run dist:macArm
             security delete-keychain "${KEY_CHAIN}"
 
       - run:
           name: Rename DMG to fixed name
           command: |
             set -e
+            ls builds
             DMG=$(find builds -name "SikhiToTheMax-*-arm64.dmg" | head -n 1)
             if [ -z "$DMG" ]; then
               echo "DMG not found!"
@@ -96,10 +97,11 @@ jobs:
           path: SikhiToTheMax-arm64-latest.dmg
       
       - run:
-          name: Cleanup all DMG files
+          name: Cleanup all build files
           command: |
-            echo "Cleaning up leftover DMGs..."
-            find . -name "*.dmg" -delete
+            ls builds
+            echo "Cleaning up build leftovers..."
+            rm -rf builds
 
       - save_cache:
           key: dependency-cache-{{ checksum "package.json" }}
