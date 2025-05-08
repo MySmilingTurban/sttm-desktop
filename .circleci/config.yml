@@ -48,12 +48,7 @@ jobs:
           command: |
             nvm use v18.18.0
 
-            # debug
-            printenv
-            printenv | grep CSC_LINK
-
-            # now decode real secret
-            echo "${CSC_LINK}" | base64 --decode > ${CERTIFICATE_P12}
+            echo "${CSC_LINK}" | base64 --decode > "${CERTIFICATE_P12}"
 
             #create a keychain
             security create-keychain -p "${CSC_KEY_PASSWORD}" "${KEY_CHAIN}"
