@@ -12,34 +12,50 @@ jobs:
     executor: macos-exec
     steps:
       - checkout
-      - run:
-          name: Ensure Python distutils support
-          command: |
-            # install setuptools (which brings back distutils)
-            brew install python-setuptools    # Homebrew formula for setuptools :contentReference[oaicite:2]{index=2}
-            python3 -m pip install --upgrade setuptools
 
       - restore_cache:
           key: dependency-cache-{{ checksum "package.json" }}
+      - run:
+          name: Flag restored cache
+          command: echo "true" > .cache-hit
+
+      - run:
+          name: Ensure Python distutils support
+          command: |
+            if [ ! -f .cache-hit ]; then
+              # install setuptools (which brings back distutils)
+              brew install python-setuptools    # Homebrew formula for setuptools :contentReference[oaicite:2]{index=2}
+              python3 -m pip install --upgrade setuptools
+            else
+              echo "Cache hit: skipping Python setup"
+            fi
 
       - run:
           name: Verify nvm Installation, Install Node.js v18, Build & Package macOS App
           # run in a login shell so ~/.bash_profile / ~/.bashrc are loaded
           command: |
-            if ! command -v nvm &> /dev/null; then
-              echo "nvm could not be found, installing..."
-              curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.5/install.sh | bash
+            if [ ! -f .cache-hit ]; then
+              if ! command -v nvm &> /dev/null; then
+                echo "nvm could not be found, installing..."
+                curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.5/install.sh | bash
+                export NVM_DIR="$HOME/.nvm"
+                [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+              fi
+              # if NVM was installed in $HOME:
+              [ -s "$HOME/.nvm/nvm.sh" ] && . "$HOME/.nvm/nvm.sh"
+
+              nvm install v18.18.0
+              nvm use v18.18.0
+
+              npm install
+            else
+              echo "Cache hit: skipping npm install"
               export NVM_DIR="$HOME/.nvm"
-              [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+              [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
+              nvm use v18.18.0
+              npm install
             fi
-            # if NVM was installed in $HOME:
-            [ -s "$HOME/.nvm/nvm.sh" ] && . "$HOME/.nvm/nvm.sh"
-
-            nvm install v18.18.0
-            nvm use v18.18.0
-
-            npm install
-
+            
       - run:
           name: Import Code Signing Certificate
           environment:
@@ -74,16 +90,25 @@ jobs:
             security delete-keychain "${KEY_CHAIN}"
 
       - run:
-          name: Locate & rename DMG
+          name: Rename DMG to fixed name
           command: |
-            # find the one file that matches your pattern
-            SRC=$(ls builds/SikhiToTheMax-*-arm64.dmg)
-            echo "Found $SRC"
-            # rename it to a fixed name
-            cp "$SRC" SikhiToTheMax-arm64-latest.dmg
+            set -e
+            DMG=$(find builds -name "SikhiToTheMax-*-arm64.dmg" | head -n 1)
+            if [ -z "$DMG" ]; then
+              echo "DMG not found!"
+              exit 1
+            fi
+            echo "Found: $DMG"
+            cp "$DMG" SikhiToTheMax-arm64-latest.dmg
 
       - store_artifacts:
           path: SikhiToTheMax-arm64-latest.dmg
+      
+      - run:
+          name: Cleanup all DMG files
+          command: |
+            echo "Cleaning up leftover DMGs..."
+            find . -name "*.dmg" -delete
 
       - save_cache:
           key: dependency-cache-{{ checksum "package.json" }}
