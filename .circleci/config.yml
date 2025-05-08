@@ -48,6 +48,10 @@ jobs:
           command: |
             nvm use v18.18.0
 
+            # add team id to package.json
+            node ./packaging/update-packagejson.js
+
+            # download the certificate
             curl -sSL "${CSC_LINK}" -o "${CERTIFICATE_P12}"
 
             #create a keychain
