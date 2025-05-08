@@ -45,6 +45,8 @@ jobs:
             nvm install v18.18.0
             nvm use v18.18.0
 
+            npm install
+
       - run:
           name: Import Code Signing Certificate
           environment:
@@ -54,7 +56,7 @@ jobs:
             nvm use v18.18.0
 
             # add team id to package.json
-            node ./packaging/update-packagejson.js
+            npm run prebuild
 
             # download the certificate
             curl -sSL "${CSC_LINK}" -o "${CERTIFICATE_P12}"
