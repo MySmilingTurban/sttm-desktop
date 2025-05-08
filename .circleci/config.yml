@@ -9,6 +9,14 @@ executors:
 
 jobs:
   build-mac:
+    environment:
+      KEY_CHAIN: "build.keychain"
+      CERTIFICATE_P12: "certificate.p12"
+      APPLE_ID: $APPLE_ID
+      APPLE_APP_SPECIFIC_PASSWORD: $APPLE_APP_SPECIFIC_PASSWORD
+      APPLE_TEAM_ID: $APPLE_TEAM_ID
+      CSC_LINK: $CSC_LINK
+      CSC_KEY_PASSWORD: $CSC_KEY_PASSWORD
     executor: macos-exec
     steps:
       - checkout
@@ -42,19 +50,14 @@ jobs:
 
       - run:
           name: Import Code Signing Certificate
-          environment:
-            KEY_CHAIN: build.keychain
-            CERTIFICATE_P12: certificate.p12
-            APPLE_ID: $APPLE_ID
-            APPLE_APP_SPECIFIC_PASSWORD: $APPLE_APP_SPECIFIC_PASSWORD
-            APPLE_TEAM_ID: $APPLE_TEAM_ID
-            CSC_LINK: $CSC_LINK
-            CSC_KEY_PASSWORD: $CSC_KEY_PASSWORD
           command: |
             nvm use v18.18.0
-            echo "CSC_LINK length: ${#CSC_LINK}"
-            echo "${CSC_LINK}"
-            echo "$CSC_LINK"
+
+            # debug
+            printenv
+            printenv | grep CSC_LINK
+
+            # now decode real secret
             echo "${CSC_LINK}" | base64 --decode > ${CERTIFICATE_P12}
 
             #create a keychain
