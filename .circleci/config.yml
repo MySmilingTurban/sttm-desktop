@@ -121,7 +121,11 @@ jobs:
             fi
 
             echo "🔒 Gatekeeper assessment:"
-            spctl -a -vvv "$DMG_FILE"
+            hdiutil attach SikhiToTheMax-arm64-latest.dmg
+            spctl -a -vvv /Volumes/SikhiToTheMax/SikhiToTheMax.app
+            ls
+            ls -la /Volumes/SikhiToTheMax
+            spctl -a -vvv "SikhiToTheMax.app"
       
       - run:
           name: Cleanup all build files
