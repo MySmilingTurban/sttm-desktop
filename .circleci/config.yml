@@ -78,7 +78,6 @@ jobs:
 
             npm run pack:macArm
             rm -fr *.p12
-            security delete-keychain "${KEY_CHAIN}"
 
       - run:
           name: Rename DMG to fixed name
@@ -97,7 +96,7 @@ jobs:
           name: Verify and Code sign .dmg Signature
           environment:
             DMG_FILE: "SikhiToTheMax-arm64-latest.dmg"
-            IDENTITY: "Developer ID Application: Khalis, Inc. (${APPLE_TEAM_ID})"
+            IDENTITY: "Developer ID Application: Khalis, Inc."
           command: |
             echo "🔑 Listing all identities in the keychain..."
             security find-identity -p codesigning -v
