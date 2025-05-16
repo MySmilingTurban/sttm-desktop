@@ -104,10 +104,10 @@ jobs:
             rm -rf builds
 
       - run:
-        name: Verify .dmg Signature
-        command: |
-          codesign --verify --deep --strict builds/SikhiToTheMax-*-arm64.dmg
-          spctl -a -vvv builds/SikhiToTheMax-*-arm64.dmg
+          name: Verify .dmg Signature
+          command: |
+            codesign --verify --deep --strict builds/SikhiToTheMax-*-arm64.dmg
+            spctl -a -vvv builds/SikhiToTheMax-*-arm64.dmg
 
 workflows:
   build:
