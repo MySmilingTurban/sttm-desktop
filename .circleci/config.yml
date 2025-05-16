@@ -119,18 +119,6 @@ jobs:
             else
               echo "✅ DMG is already properly signed. No action needed."
             fi
-
-            echo "🔒 Gatekeeper assessment:"
-            hdiutil attach SikhiToTheMax-arm64-latest.dmg
-            echo "🔒 Verifying Gatekeeper signature..."
-            spctl -a -vvv /Volumes/SikhiToTheMax/SikhiToTheMax.app
-            echo "listing all files in current directory"
-            ls
-            echo "listing all files in SikhiToTheMax directory"
-            ls -la /Volumes/SikhiToTheMax
-            echo "another test for .app in current directory"
-            ls -la SikhiToTheMax.app
-            spctl -a -vvv "SikhiToTheMax.app"
       
       - run:
           name: Cleanup all build files
