@@ -93,8 +93,11 @@ jobs:
             echo "Found: $DMG"
             cp "$DMG" SikhiToTheMax-arm64-latest.dmg
 
-      - store_artifacts:
-          path: SikhiToTheMax-arm64-latest.dmg
+      - run:
+          name: Verify .dmg Signature
+          command: |
+            codesign --verify --deep --strict SikhiToTheMax-arm64-latest.dmg
+            spctl -a -vvv SikhiToTheMax-arm64-latest.dmg
       
       - run:
           name: Cleanup all build files
@@ -102,12 +105,9 @@ jobs:
             ls builds
             echo "Cleaning up build leftovers..."
             rm -rf builds
-
-      - run:
-          name: Verify .dmg Signature
-          command: |
-            codesign --verify --deep --strict builds/SikhiToTheMax-*-arm64.dmg
-            spctl -a -vvv builds/SikhiToTheMax-*-arm64.dmg
+      
+      - store_artifacts:
+          path: SikhiToTheMax-arm64-latest.dmg
 
 workflows:
   build:
