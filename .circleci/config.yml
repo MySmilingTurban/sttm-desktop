@@ -94,10 +94,30 @@ jobs:
             cp "$DMG" SikhiToTheMax-arm64-latest.dmg
 
       - run:
-          name: Verify .dmg Signature
+          name: Verify and Code sign .dmg Signature
+          environment:
+            DMG_FILE: "SikhiToTheMax-arm64-latest.dmg"
+            IDENTITY: "Developer ID Application: Khalis, Inc."
           command: |
-            codesign --verify --deep --strict SikhiToTheMax-arm64-latest.dmg
-            spctl -a -vvv SikhiToTheMax-arm64-latest.dmg
+            echo "🔍 Verifying DMG signature..."
+            if ! codesign --verify --deep --strict "$DMG_FILE"; then
+              echo "❌ DMG is not properly signed. Attempting to sign it now..."
+
+              codesign --sign "$IDENTITY" --timestamp --options runtime "$DMG_FILE"
+
+              echo "✅ Signing completed. Re-verifying..."
+              if codesign --verify --deep --strict "$DMG_FILE"; then
+                echo "🎉 DMG has been successfully signed!"
+              else
+                echo "🚨 Failed to sign DMG properly. Please check codesigning identity and try again."
+                exit 1
+              fi
+            else
+              echo "✅ DMG is already properly signed. No action needed."
+            fi
+
+            echo "🔒 Gatekeeper assessment:"
+            spctl -a -vvv "$DMG_FILE"
       
       - run:
           name: Cleanup all build files
