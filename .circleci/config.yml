@@ -15,12 +15,6 @@ jobs:
 
       - restore_cache:
           key: dependency-cache-{{ checksum "package.json" }}
-      
-      - run:
-          name: Cleanup all build files
-          command: |
-            echo "Cleaning up past builds..."
-            rm -rf builds
 
       - run:
           name: Ensure Python distutils support
@@ -47,6 +41,11 @@ jobs:
 
             npm install
 
+      - save_cache:
+          key: dependency-cache-{{ checksum "package.json" }}
+          paths:
+            - ./node_modules
+
       - run:
           name: Import Code Signing Certificate
           environment:
@@ -60,6 +59,7 @@ jobs:
 
             # download the certificate
             curl -sSL "${CSC_LINK}" -o "${CERTIFICATE_P12}"
+            openssl pkcs12 -in ${CERTIFICATE_P12} -nodes -legacy -passin pass:"${CSC_KEY_PASSWORD}"
 
             #create a keychain
             security create-keychain -p "${CSC_KEY_PASSWORD}" "${KEY_CHAIN}"
@@ -103,10 +103,11 @@ jobs:
             echo "Cleaning up build leftovers..."
             rm -rf builds
 
-      - save_cache:
-          key: dependency-cache-{{ checksum "package.json" }}
-          paths:
-            - ./node_modules
+      - run:
+        name: Verify .dmg Signature
+        command: |
+          codesign --verify --deep --strict builds/SikhiToTheMax-*-arm64.dmg
+          spctl -a -vvv builds/SikhiToTheMax-*-arm64.dmg
 
 workflows:
   build:
