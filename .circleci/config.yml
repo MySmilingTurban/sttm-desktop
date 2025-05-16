@@ -97,11 +97,16 @@ jobs:
           name: Verify and Code sign .dmg Signature
           environment:
             DMG_FILE: "SikhiToTheMax-arm64-latest.dmg"
-            IDENTITY: "Developer ID Application: Khalis, Inc."
+            IDENTITY: "Developer ID Application: Khalis, Inc. (${CSC_TEAM_ID})"
           command: |
+            echo "🔑 Listing all identities in the keychain..."
+            security find-identity -p codesigning -v
+            echo "🔑 Listing all keychains..."
+            security list-keychains -d user
+
             echo "🔍 Verifying DMG signature..."
             if ! codesign --verify --deep --strict "$DMG_FILE"; then
-              echo "❌ DMG is not properly signed. Attempting to sign it now..."
+              echo "❌ DMG is not properly signed. Attempting to sign it now... $IDENTITY"
 
               codesign --sign "$IDENTITY" --timestamp --options runtime "$DMG_FILE"
 
